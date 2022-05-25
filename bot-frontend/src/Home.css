@@ -1,0 +1,206 @@
+.navbar.navbar-inverse.bringToFrontDiv{
+    box-shadow: 0 0.3rem 0.4rem 4px rgb(0 0 0 / 25%);
+    border: 0;
+    margin: 0;
+    min-height:100%;
+    margin-bottom: 0%;
+  
+  }
+  
+  body {
+    background-image: url('/public/bg1.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden; 
+  }
+  
+  .my-container{
+    max-width: 300px;
+    min-height: 100px;
+    margin: 40px auto;
+    padding: 20px 30px 30px 20px;
+    background-color: #ecf0f3;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .my-container h1{
+    margin: 0px auto;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding-top: 0%;
+    color: #cbf83e;
+  }
+  
+  .my-container h3{
+    margin: 20px auto;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding-top: 0%;
+    color: #3a3b3c;
+  }
+  
+  .vl {
+    border-left: 3px solid #cbf83e;
+    height: 100px;
+    margin: auto;
+    margin-top: 70px;
+    margin-left: 10rem;
+  }
+  
+  .jumbotron{
+    margin-top: 0%;
+  }
+  .jumbotron.bg-cover{
+    background-size: cover;
+    background-image: url(/public/jumbbg.gif);
+    margin-top: 0%;
+  }
+  
+  .jumbotron.bg-cover h1{
+    text-align: center;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: #cbf83e;
+    size: 150%;
+  }
+  
+  .calculator-container{
+    width: 80%;
+    height: 100%;
+    margin: 40px auto;
+    padding: 20px 30px 30px 20px;
+    background-color: #ecf0f3;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .calculator-container h1{
+    margin: auto;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding-top: 0%;
+    padding-bottom:0%;
+    color: #cbf83e;
+  }
+  
+  .bi-currency-exchange{
+    font-size: 5rem;
+    color:#cbf83e;
+    margin: auto;
+  }
+  .bi-arrow-left-right{
+    font-size: 4rem;
+    color:#cbf83e;
+    margin: auto;
+  }
+  
+  .col-lg-5 h3{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 0%;
+    color: #3a3b3c;
+  }
+  
+  .col-lg-6 h3{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 0%;
+    color: #3a3b3c;
+  }
+  
+  .col-lg-2.offset-lg-6{
+    flex-direction: column;
+    display:flex
+  }
+  
+  .form-control{
+    height: 200%
+  }
+  
+  .row.inputs{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 2rem;
+  }
+  
+  
+  .input-group{
+    margin: auto;
+    border-radius: 2rem;
+  }
+  
+  .input-group input{
+    border-radius: 2rem;
+    height: 5rem;
+    font-size: larger;
+    
+  }
+  
+  .col-lg-2.vertical-line{
+    justify-content: center;
+  }
+  
+  .navbar-brand{
+    font: bold;
+  }
+  
+  .my-container.left{
+    margin-right: 5rem;
+  
+  }
+  
+  .my-container.right{
+    margin-left: 5rem;
+  }
+  
+  .calculator-container h1{
+    margin-bottom: 2rem;
+  }
+  
+  .col-lg-2.offset-lg-6 div,i{
+    margin: auto;
+  }
+  
+  .btn-group{
+    display: flex;
+    flex-direction: row;
+  }
+  .btn-group button{
+    background-color: #cbf83e;
+    color: #3a3b3c;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font:bolder;
+    margin: auto;
+    width: 8rem;
+    height: 5rem;
+    text-align: center;
+  }
+  
+  .navbar-buttons{
+    background-color: #cbf83e;
+    color: #3a3b3c;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font:bolder;
+    margin-top: 0.5rem;
+    margin-right: 0.5rem;
+    width: 7rem;
+    height: 4rem;
+    text-align: center;
+    border-radius: 1rem;
+  }
+
+  .button-funds{
+    background-color: #cbf83e;
+    color: #3a3b3c;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font:bolder;
+    margin: auto;
+    width: 10rem;
+    height: 4rem;
+    text-align: center;
+    border-radius: 0.5rem;
+  }

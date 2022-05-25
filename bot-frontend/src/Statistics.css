@@ -1,0 +1,124 @@
+.navbar.navbar-inverse.bringToFrontDiv{
+    box-shadow: 0 0.3rem 0.4rem 4px rgb(0 0 0 / 25%);
+    border: 0;
+    margin: 0;
+    min-height:100%;
+    margin-bottom: 0%;
+ 
+ }
+
+body {
+    background-image: url('/public/bg1.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    overflow-x: hidden; 
+}
+
+.top-container{
+    max-width: 120rem;
+    min-height: 30rem;
+    margin: 40px auto;
+    padding: 2rem;
+    background-color: #ecf0f3;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+
+}
+
+.vl {
+    border-left: 3px solid #cbf83e;
+    height: 100px;
+    margin: auto;
+    margin-top: 70px;
+    margin-left: 10rem;
+  }
+
+.col-lg-4 h2{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #cbf83e;
+    padding-bottom: 0rem;
+    
+}
+
+.col-lg-4 h4{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 0rem;
+   
+}
+
+.col-lg-2 h3{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 0rem; 
+}
+
+.col-lg-2 h3{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 0.5rem; 
+}
+
+.col-lg-4 h3{
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 0.5rem; 
+}
+
+.col-lg-2 h4{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 2rem; 
+}
+
+.col-lg-2.align h3{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font: bold;
+    color: #3a3b3c;
+    padding-top: 0.5rem; 
+    padding-left: 0%;
+}
+
+.row.elements{
+    padding-top:0rem;
+    margin-top: 0rem;
+}
+
+.jumbotron{
+    margin-top: 0%;
+    margin-right: 0%;
+    height: 11rem;
+    padding: 0.1rem;
+}
+.jumbotron.bg-cover{
+    background-size: cover;
+    background-image: url(/public/jumbbg.gif);
+    margin-top: 0%;
+    margin-right: 0%;
+
+}
+
+.jumbotron h1{
+    text-align: center;
+    color: #cbf83e;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.radio-buttons{
+    margin-left: 30%;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: large;
+}

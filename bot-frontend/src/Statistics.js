@@ -58,6 +58,7 @@ function Statistics() {
   }
   useEffect(fetchStats, []);
 
+  
   async function fetchGraph(val) {
     const data = parseInt(val);
     await fetch(`${SERVER_URL}/graph`, {

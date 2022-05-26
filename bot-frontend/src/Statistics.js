@@ -1,7 +1,6 @@
 import "./Statistics.css";
 import { useState, useEffect, useCallback } from "react";
 import { clearUserToken, saveUserToken, getUserToken } from "./localStorage";
-import UserCredentialsDialog from "./UserCredentialsDialog/UserCredentialsDialog";
 import { NavLink, Route, Switch } from "react-router-dom";
 import {
   LineChart,
@@ -12,6 +11,7 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
+import LoginDialog from "./UserCredentialsDialog/LoginDialog";
 
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -117,7 +117,7 @@ function Statistics() {
   return (
     <div className="statistics">
       {authState === States.USER_CREATION && (
-        <UserCredentialsDialog
+        <LoginDialog
           open={true}
           title={"Register"}
           submitText={"Register"}
@@ -126,7 +126,7 @@ function Statistics() {
         />
       )}
       {authState === States.USER_LOG_IN && (
-        <UserCredentialsDialog
+        <LoginDialog
           open={true}
           title={"Log in"}
           submitText={"Log in"}

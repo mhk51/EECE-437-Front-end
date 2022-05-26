@@ -1,9 +1,9 @@
 import './Transactions.css';
 import { useState, useEffect, useCallback } from "react";
 import { clearUserToken, saveUserToken, getUserToken } from "./localStorage";
-import UserCredentialsDialog from "./UserCredentialsDialog/UserCredentialsDialog";
 import { NavLink, Route, Switch } from 'react-router-dom';
 import { DataGrid } from "@mui/x-data-grid";
+import LoginDialog from './UserCredentialsDialog/LoginDialog';
 
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -16,82 +16,15 @@ const States = {
 
 
 function Transactions(){
-  let [lbpInput, setLbpInput] = useState("");
-  let [usdInput, setUsdInput] = useState("");
   let [userToken, setUserToken] = useState(getUserToken());
   let [authState, setAuthState] = useState(States.PENDING);
   let [userTransactions, setUserTransactions] = useState([]);
-  let [pendingTransactions, setPendingTransactions] = useState([]);
-  const [selectionModel, setSelectionModel] = useState([]);
-  let [Risk, setRisk] = useState("");
-  let [buyUsdRate, setBuyUsdRate] = useState(null);
-  let [sellUsdRate, setSellUsdRate] = useState(null);
-  let [lbpCalcInp, setlbpCalcIn] = useState("");
-  let [usdCalcInp, setusdCalcInp] = useState("");
-  let [transTypeCalc, settransTypeCalc] = useState("usd-to-lbp");
-  let [usdFunds, setUsdFunds] = useState("null");
-  let [lbpFunds, setLbpFunds] = useState("null");
-  let [graph, setGraph] = useState(null);
-  let [coin_name, setCoin_name] = useState(null);
+  let [risk, setRisk] = useState(null);
+  let [buy_percentage,setBuyPercentage] = useState(null);
+  let [coin_name, setCoin_name] = useState("bitcoin");
+  let [bot_active,setBotActive] = useState(false);
 
 
-  async function addItem(transtype) {
-    var type_trans_val = false;
-    if (transtype === true) {
-      type_trans_val = true;
-    }
-
-    const data = {
-      usd_amount: usdInput,
-      lbp_amount: lbpInput,
-      usd_to_lbp: type_trans_val,
-    };
-
-    await fetch(`${SERVER_URL}/transaction`, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": 'Bearer ' + getUserToken(),
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-        fetchPendingTransactions();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-
-  }
-
-  async function completeTransaction() {
-    
-    const data = {
-      transaction_id: selectionModel
-    };
-
-    await fetch(`${SERVER_URL}/complete`, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": 'Bearer ' + getUserToken(),
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-        fetchPendingTransactions();
-        fetchUserTransactions();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
 
   function login(username, password) {
     return fetch(`${SERVER_URL}/authentication`, {
@@ -100,7 +33,7 @@ function Transactions(){
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_name: username,
+        username: username,
         password: password,
       }),
     })
@@ -119,7 +52,7 @@ function Transactions(){
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_name: username,
+        username: username,
         password: password,
       }),
     }).then((response) => login(username, password));
@@ -131,7 +64,7 @@ function Transactions(){
   }
 
   const fetchUserTransactions = useCallback(() => {
-    fetch(`${SERVER_URL}/transaction`, {
+    fetch(`${SERVER_URL}/transactions`, {
       headers: {
         Authorization: `bearer ${userToken}`,
       },
@@ -145,21 +78,26 @@ function Transactions(){
     }
   }, [fetchUserTransactions, userToken]);
 
-  const fetchPendingTransactions = useCallback(() => {
-    fetch(`${SERVER_URL}/pending`, {
+
+  const fetchBotState = useCallback(() => {
+    fetch(`${SERVER_URL}/bot`, {
+      headers: {
+        Authorization: `bearer ${userToken}`,
+      },
     })
       .then((response) => response.json())
-      .then((transactions) => setPendingTransactions(transactions));
-  }, []);
+      .then((data) => setBotActive(data['is_active']));
+  }, [userToken]);
   useEffect(() => {
     if (userToken) {
-      fetchPendingTransactions();
+      fetchBotState();
     }
-  }, [fetchPendingTransactions, userToken]);
+  }, [fetchBotState, userToken]);
 
-  function Start_bot(){
-    return fetch(`${SERVER_URL}/activateBot`, {
-      method: "POST",
+
+  async function Switch_Activate(){
+    await fetch(`${SERVER_URL}/switchActivate`, {
+      method: "GET",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
@@ -170,28 +108,15 @@ function Transactions(){
       .catch((error) => {
         console.error("Error:", error);
       });
-  }
-  function Stop_bot(){
-    return fetch(`${SERVER_URL}/deactivateBot`, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": 'Bearer ' + getUserToken(),
-      }
-    })
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    fetchBotState();
   }
   function Change_param(){
     const data = {
-      coin_name: coin_name,
-      risk: usdCalcInp,
-      percentage_change: lbpCalcInp
+      coin_name: coin_name.toLowerCase(),
+      risk: risk/100,
+      buy_percentage: buy_percentage/100
     };
-    return fetch(`${SERVER_URL}/chnage_param`, {
+    return fetch(`${SERVER_URL}/change_param`, {
       method: "POST",
       mode: "cors",
       headers: {
@@ -205,11 +130,10 @@ function Transactions(){
         console.error("Error:", error);
       });
   }
-
   return(
         <div className='transactions'>
       {authState === States.USER_CREATION && (
-        <UserCredentialsDialog
+        <LoginDialog
           open={true}
           title={"Register"}
           submitText={"Register"}
@@ -218,7 +142,7 @@ function Transactions(){
         />
       )}
       {authState === States.USER_LOG_IN && (
-        <UserCredentialsDialog
+        <LoginDialog
           open={true}
           title={"Log in"}
           submitText={"Log in"}
@@ -269,10 +193,12 @@ function Transactions(){
       <DataGrid
       id="table"
             columns={[
-              {field: "added_date", headerName: "Date added", width: 250 },
-              {field: "lbp_amount", headerName: "LBP Amount", flex: 1 },
+              {field: "date", headerName: "Date", width: 200 },
+              {field: "coin_amount", headerName: "Coin Amount", flex: 1 },
               {field: "usd_amount", headerName: "USD Amount", flex: 1 },
-              {field: "usd_to_lbp", headerName: "USD to LBP", flex: 1 },
+              {field: "exchange_rate",headerName: "Exchange Name",flex: 1},
+              {field: "coin_name",headerName: "Coin Name",flex: 1},
+              {field: "buying", headerName: "Buy/Selling", flex: 1 },
             ]}
             rows={userTransactions}
             autoHeight
@@ -287,9 +213,7 @@ function Transactions(){
             <h3>Risk</h3>
           </div>
           <div className="col-lg-2 offset-lg-6">
-            <div>
-            <i className="bi-currency-exchange" ></i>
-            </div>
+
           </div>
           <div className="col-lg-5">
             <h3>Percentage of Use</h3>
@@ -306,9 +230,9 @@ function Transactions(){
               variant="filled"
               type="number"
               min="0"
-              value={lbpCalcInp}
+              // value={lbpCalcInp}
               onChange={(val) => {
-                  setlbpCalcIn(val.target.value);
+                  setRisk(val.target.value);
               }}
               />
             </div>
@@ -333,9 +257,9 @@ function Transactions(){
               variant="filled"
               type="number"
               min="0"
-              value={usdCalcInp}
+              // value={usdCalcInp}
               onChange={(val) => {
-                  setusdCalcInp(val.target.value);
+                  setBuyPercentage(val.target.value);
               }}
               />
             </div>
@@ -349,7 +273,7 @@ function Transactions(){
           <div className="col-lg-2 offset-lg-6">
             <div>
             <div class="btn-group">
-            <button type="button" className="btn btn-primary" onClick={Change_param()}>Submit</button>
+            <button type="button" className="btn btn-primary" onClick={Change_param}>Submit</button>
           </div>
             </div>
             </div>
@@ -360,11 +284,30 @@ function Transactions(){
       </div>
     </div>
     <div className="row">
-      <div className="col-lg-5">
+    <div className="col-lg-12">
+                      
+    {bot_active === false ? (
+                      <div className="my-container center" >
+                        <h1>Bot Deactivated {" "}</h1>
+                        <div class="btn-group">
+                          <button type="button" className="btn btn-primary" onClick={Switch_Activate}>Activate</button>
+                          </div>
+                          </div>
+                      ) : (
+                        <div className="my-container center" >
+                          <h1>Bot Activated {" "}</h1>
+                          <div class="btn-group">
+                            <button type="button" className="btn btn-primary" onClick={Switch_Activate}>Deactivate</button>
+                            </div>
+                        </div>
+                      )}
+              </div>
+                    
+      {/* <div className="col-lg-5">
         <div className="my-container left" >
           <h1>Start {" "}</h1>
           <div class="btn-group">
-            <button type="button" className="btn btn-primary" onClick={Start_bot()}>Start</button>
+            <button type="button" className="btn btn-primary" onClick={Switch_Activate()}>Start</button>
             </div>
         </div>
       </div>
@@ -378,7 +321,7 @@ function Transactions(){
           <button type="button" className="btn btn-primary" onClick={Stop_bot()}>Stop</button>
             </div>
         </div>
-      </div>
+      </div> */}
     </div>
     </div>
     );

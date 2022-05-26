@@ -1,7 +1,6 @@
 import './Home.css';
 import { useState, useEffect, useCallback } from "react";
 import { clearUserToken, saveUserToken, getUserToken } from "./localStorage";
-import UserCredentialsDialog from "./UserCredentialsDialog/UserCredentialsDialog";
 import { NavLink, Route, Routes } from 'react-router-dom';
 import Transactions from './Transactions';
 import TradeViewChart from 'react-crypto-chart'
@@ -15,6 +14,8 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
+import LoginDialog from './UserCredentialsDialog/LoginDialog';
+import CreateUserDialog from './UserCredentialsDialog/CreateUserDialog';
 
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -97,7 +98,7 @@ function Home(){
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_name: username,
+        username: username,
         password: password,
       }),
     })
@@ -109,15 +110,17 @@ function Home(){
       });
   }
 
-  function createUser(username, password) {
-    return fetch(`${SERVER_URL}/user`, {
+  function createUser(username, password,email,date) {
+    return fetch(`${SERVER_URL}/add_user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_name: username,
+        username: username,
         password: password,
+        mail:email,
+        dob: date
       }),
     }).then((response) => login(username, password));
   }
@@ -129,7 +132,7 @@ function Home(){
     return(
         <div className='transactions'>
             {authState === States.USER_CREATION && 
-        <UserCredentialsDialog
+        <CreateUserDialog
           open={true}
           title={"Register"}
           submitText={"Register"}
@@ -139,7 +142,7 @@ function Home(){
         />
       }
       {authState === States.USER_LOG_IN && (
-        <UserCredentialsDialog
+        <LoginDialog
           open={true}
           title={"Log in"}
           submitText={"Log in"}
@@ -153,8 +156,7 @@ function Home(){
         <div className="container-fluid">
           <div className="navbar-header">
             <a className="navbar-brand" href="/" 
-              >REMEX Trading</a
-            >
+              >REMEX Trading</a>
           </div>
           <ul className="nav navbar-nav">
             <li><NavLink activeClassName="current" to="/">Home</NavLink></li>

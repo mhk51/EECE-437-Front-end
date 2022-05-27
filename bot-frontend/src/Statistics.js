@@ -12,6 +12,14 @@ import {
   CartesianGrid
 } from 'recharts';
 import LoginDialog from "./UserCredentialsDialog/LoginDialog";
+import TradeViewChart  from "react-crypto-chart";
+import TradeView from "./TradeView";
+import { WS_URL } from './utils/constants';
+import {
+  candleStickDefaultConfig,
+  histogramDefaultConfig,
+  defaultChartLayout,
+} from './utils/constants';
 
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -112,6 +120,8 @@ function Statistics() {
     setUserToken(null).then(clearUserToken);
   }
 
+
+  
  
 
   return (
@@ -150,7 +160,7 @@ function Statistics() {
               </li>
               <li>
                 <NavLink activeClassName="current" to="/transactions">
-                  Transactions
+                  Bot
                 </NavLink>
               </li>
               <li>
@@ -285,11 +295,24 @@ function Statistics() {
       <div className="row">
         <div className="col-lg-12">
           <div className="jumbotron bg-cover">
-            <h1>Average Exchange Rate in the past month</h1>
+            <h1>Cryptocurrency Trend</h1>
           </div>
         </div>
       </div>
-      
+      <div className="top-container">
+      <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
+        <input type="radio" value="1" name="gender" />1 Day  -
+        <input type="radio" value="3" name="gender" />3 Days  -    
+        <input type="radio" value="7" name="gender" />1 Week  -    
+        <input type="radio" value="30" name="gender" />1 Month     
+      </div>
+      <ResponsiveContainer width="120%" aspect={3}>
+      <TradeView
+        // initialChartData={candleStickData}
+      />
+        
+			</ResponsiveContainer>
+      </div>
     </div>
   );
 }

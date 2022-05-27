@@ -51,15 +51,14 @@ function Home(){
 
   async function fetchGraph(val) {
     const data = parseInt(val);
-    await fetch(`${SERVER_URL}/graph`, {
+    await fetch(`${SERVER_URL}/performance`, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": 'Bearer ' + getUserToken(),
       },
-      body: JSON.stringify({
-        start_range : data,
-      }),
+      body: JSON.stringify({'days':data})
     })
       .then((response) => response.json())
       .then((graph) => setGraph(graph));
@@ -160,7 +159,7 @@ function Home(){
           </div>
           <ul className="nav navbar-nav">
             <li><NavLink activeClassName="current" to="/">Home</NavLink></li>
-            <li><NavLink activeClassName="current" to="/transactions">Transactions</NavLink></li>
+            <li><NavLink activeClassName="current" to="/transactions">Bot</NavLink></li>
             <li><NavLink activeClassName="current" to="/statistics">Statistics</NavLink></li>
           </ul>
 
@@ -336,24 +335,21 @@ function Home(){
     <div className="top-container">
       <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
         <input type="radio" value="1" name="gender" />1 Day  -
+        <input type="radio" value="3" name="gender" />3 Days  -    
         <input type="radio" value="7" name="gender" />1 Week  -    
-        <input type="radio" value="30" name="gender" />1 Month  -    
-        <input type="radio" value="365" name="gender" />1 Year     
+        <input type="radio" value="30" name="gender" />1 Month     
       </div>
       <ResponsiveContainer width="120%" aspect={3}>
-				{/* <LineChart data={graph} margin={{ right: 300 }}>
+				<LineChart data={graph} margin={{ right: 300 }}>
 					<CartesianGrid />
 					<XAxis dataKey="date"
 						interval={'preserveStartEnd'} />
 					<YAxis></YAxis>
 					<Legend />
 					<Tooltip />
-					<Line dataKey="lbp_to_usd_average"
+					<Line dataKey="amount"
 						stroke="blue" activeDot={{ r: 8 }} />
-					<Line dataKey="usd_to_lbp_average"
-						stroke="yellow" activeDot={{ r: 8 }} />
-				</LineChart> */}
-        <TradeViewChart pair='BTCUSD'/>
+				</LineChart>
 			</ResponsiveContainer>
       </div>
     </div>

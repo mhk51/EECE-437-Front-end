@@ -6,7 +6,6 @@ import { jsonToWallet,walletToChart} from './models/wallet';
 import { jsonToPerformance } from './models/performance';
 import { PieChart } from 'react-minimal-pie-chart';
 import { jsonToExchangeRate } from './models/exchangeRate';
-import Transactions from './Transactions';
 
 import {
   LineChart,
@@ -36,12 +35,14 @@ function Home(){
   let [userToken, setUserToken] = useState(getUserToken());
   let [walletAmount,setWalletAmount] = useState(0)
   let [firstWalletAmount,setFirstWalletAmount] = useState(0)
-  let [day3WalletAmount,setDay3WalletAmount] = useState(0)
-  let [day7WalletAmount,setDay7WalletAmount] = useState(0)
+  let [oneDayWalletAmount,setoneDayWalletAmount] = useState(0)
+  let [sevenDayWalletAmount,setsevenDayWalletAmount] = useState(0)
   let [authState, setAuthState] = useState(States.PENDING);
   let [usdFunds, setUsdFunds] = useState("null");
   let [lbpFunds, setLbpFunds] = useState("null");
+
   let [graph, setGraph] = useState([]);
+  let [graphDays,setGraphDays] = useState(1)
 
 
   function fetchWallet() {
@@ -77,39 +78,66 @@ function Home(){
   function getAmountFromDays(list,days){
     let d = new Date()
     d.setDate(d.getDate()-days);
-    console.log(d)
     for(let i =0;i<list.length;i++){
       if(Date.parse(list[i].date) > d)
         return list[i].amount
     }
     return list.length != 0 ? list[list.length-1].amount : 0
   }
+  function setGraphfromDays(graph,days){
+    let d = new Date()
+    let list = []
+    d.setDate(d.getDate()-days);
+    for(let i =0;i<graph.length;i++){
+      list.push(graph[i])
+      if(Date.parse(graph[i].date) > d){
+        return graph[i].amount
+      }
+    }
+    return 
+  }
 
-  async function fetchGraph(val) {
-    const data = parseInt(val);
-    await fetch(`${SERVER_URL}/performance`, {
+  function fetchGraph(days=1) {
+    fetch(`${SERVER_URL}/performance`, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
         "Authorization": 'Bearer ' + getUserToken(),
       },
-      body: JSON.stringify({'days':data})
+      body: JSON.stringify({'days':parseInt(days)})
+    })
+      .then((response) => response.json())
+      .then((graph) => {
+        setGraph(graph);
+      });
+  }
+  useEffect(fetchGraph,[])
+
+
+  function fetchPerformance() {
+    fetch(`${SERVER_URL}/performance`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": 'Bearer ' + getUserToken(),
+      },
+      body: JSON.stringify({'days':30})
     })
       .then((response) => response.json())
       .then((graph) => {
         setPerformanceList(jsonToPerformance(graph)); 
-        setGraph(graph);
         graph.length !=0 ? setWalletAmount(graph[graph.length-1].amount) : setWalletAmount(0);
-        graph.length !=0 ? setDay3WalletAmount(getAmountFromDays(graph,3)) : setDay3WalletAmount(0);
-        graph.length !=0 ? setDay7WalletAmount(getAmountFromDays(graph,7)) : setDay7WalletAmount(0);
+        graph.length !=0 ? setoneDayWalletAmount(getAmountFromDays(graph,1)) : setoneDayWalletAmount(0);
+        graph.length !=0 ? setsevenDayWalletAmount(getAmountFromDays(graph,3)) : setsevenDayWalletAmount(0);
         graph.length !=0 ? setFirstWalletAmount(graph[0].amount) : setFirstWalletAmount(0);
       });
   }
+  useEffect(fetchPerformance,[])
+
 
   async function addFunds() {
-    console.log(lbpFunds);
-    console.log(usdFunds);
     const data = {
       usd_amount: usdFunds,
       lbp_amount: lbpFunds
@@ -174,7 +202,6 @@ function Home(){
 
 
   function calculateLastAmount(){
-    console.log(exchangeRate)
     let previousAmount = (performanceList.length > 1) ? performanceList[performanceList.length-2].amount : 0;
     let difference = walletAmount - previousAmount;
     return difference
@@ -263,16 +290,16 @@ function Home(){
           <div className='walletTable'>
           <div className='row'>
            
+          <div className='center-block'>1 Day</div>
           <div className='center-block'>3 Day</div>
-          <div className='center-block'>7 Day</div>
           <div className='center-block'>All Time</div>
           </div>
           </div>
           <div className='row'>
-          <div className='center-block' style={{color: calculatePercentage(day3WalletAmount) > 0 ? '#77DD77' : 'red'}}>
-            <h6>{(calculatePercentage(day3WalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(day3WalletAmount).toFixed(2)}%`}</h6></div>
-          <div className='center-block' style={{color: calculatePercentage(day7WalletAmount) > 0 ? '#77DD77' : 'red'}}>
-            <h6>{(calculatePercentage(day7WalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(day7WalletAmount).toFixed(2)}%`}</h6></div>
+          <div className='center-block' style={{color: calculatePercentage(oneDayWalletAmount) > 0 ? '#77DD77' : 'red'}}>
+            <h6>{(calculatePercentage(oneDayWalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(oneDayWalletAmount).toFixed(2)}%`}</h6></div>
+          <div className='center-block' style={{color: calculatePercentage(sevenDayWalletAmount) > 0 ? '#77DD77' : 'red'}}>
+            <h6>{(calculatePercentage(sevenDayWalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(sevenDayWalletAmount).toFixed(2)}%`}</h6></div>
           <div className='center-block' style={{color: calculatePercentage(firstWalletAmount) > 0 ? '#77DD77' : 'red'}}>
             <h6>{(calculatePercentage(firstWalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(firstWalletAmount).toFixed(2)}%`}</h6></div>
           </div>
@@ -286,7 +313,7 @@ function Home(){
           <h1 style={{paddingBottom:'40px'}}> Wallet Composition </h1>
           <PieChart
             data={(wallet != null && exchangeRate != null) ? walletToChart(wallet,exchangeRate): []}
-            label={({ dataEntry }) =>  {console.log(dataEntry); return dataEntry.percentage > 40 ? dataEntry.title +" "+ dataEntry.percentage.toFixed() + "%": ''}}
+            label={({ dataEntry }) =>  {return dataEntry.percentage > 40 ? dataEntry.title +" "+ dataEntry.percentage.toFixed() + "%": ''}}
             labelPosition = {0}
           />
         </div>
@@ -297,9 +324,9 @@ function Home(){
 
     <div className="top-container">
       <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
-        <input type="radio" value="1" name="gender" />1 Day  -
-        <input type="radio" value="3" name="gender" />3 Days  -    
-        <input type="radio" value="7" name="gender" />1 Week  -    
+        <input type="radio" value="1" name="gender" />1 Day  
+        <input type="radio" value="3" name="gender" />3 Days      
+        <input type="radio" value="7" name="gender" />1 Week      
         <input type="radio" value="30" name="gender" />1 Month     
       </div>
       <ResponsiveContainer width="120%" aspect={3}>

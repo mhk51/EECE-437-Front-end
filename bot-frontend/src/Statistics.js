@@ -11,6 +11,7 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
+import Dashboard from './components/dashboard'
 import LoginDialog from "./UserCredentialsDialog/LoginDialog";
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -24,33 +25,9 @@ const States = {
 function Statistics() {
   let [userToken, setUserToken] = useState(getUserToken());
   let [authState, setAuthState] = useState(States.PENDING);
-
-  let [change_buy_24, set_change_buy_24] = useState(null);
-  let [change_buy_month, set_change_buy_month] = useState(null);
-  let [change_sell_24, set_change_sell_24] = useState(null);
-  let [change_sell_month, set_change_sell_month] = useState(null);
-  let [num_pending, set_num_pending] = useState(null);
-  let [num_trans_24, set_num_trans_24] = useState(null);
-  let [num_trans_month, set_num_trans_month] = useState(null);
   let [graph, setGraph] = useState(null);
 
 
-  function fetchStats() {
-    fetch(`${SERVER_URL}/statistics`)
-      .then((response) => response.json())
-      .then((data) => {
-        set_change_buy_24(data.change_buy_24);
-        set_change_buy_month(data.change_buy_m);
-        set_change_sell_24(data.change_sell_24);
-        set_change_sell_month(data.change_sell_m);
-        set_num_pending(data.num_pending);
-        set_num_trans_24(data.num_trans_24);
-        set_num_trans_month(data.num_trans_m);
-      });
-
-      fetchGraph();
-  }
-  useEffect(fetchStats, []);
 
   
   async function fetchGraph(val) {
@@ -184,101 +161,6 @@ function Statistics() {
           </div>
         </nav>
       </div>
-      <div className="top-container">
-        <div className="row">
-          <div className="col-lg-4">
-            <h2>Average selling rate</h2>
-            <div className="row elements">
-              <div className="col-lg-6">
-                <h4>last 24 hours</h4>
-              </div>
-              <div className="col-lg-6">
-                <h4>last month</h4>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4">
-            <h2>Average buying rate</h2>
-            <div className="row elements">
-              <div className="col-lg-6">
-                <h4>last 24 hours</h4>
-              </div>
-              <div className="col-lg-6">
-                <h4>last month</h4>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4">
-            <h2>Number of pending transactions</h2>
-          </div>
-        </div>
-        <div className="row elements">
-          <div className="col-lg-2">
-            <h3>
-              <span id="sell-usd-24">
-                {change_sell_24 == null
-                  ? "Rate not available"
-                  : change_sell_24.toFixed(2)}
-              </span>
-            </h3>
-          </div>
-          <div className="col-lg-2">
-            <h3>
-              <span id="sell-usd-month">
-                {change_sell_month == null
-                  ? "Rate not available"
-                  : change_sell_month.toFixed(2)}
-              </span>
-            </h3>
-          </div>
-          <div className="col-lg-2">
-            <h3>
-              <span id="buy-usd-24">
-                {change_buy_24 == null
-                  ? "Rate not available"
-                  : change_buy_24.toFixed(2)}
-              </span>
-            </h3>
-          </div>
-          <div className="col-lg-2">
-            <h3>
-              <span id="buy-usd-month">
-                {change_buy_month == null
-                  ? "Rate not available"
-                  : change_buy_month.toFixed(2)}
-              </span>
-            </h3>
-          </div>
-          <div className="col-lg-4">
-            <h3><span id="num-pending">
-                {num_pending == null
-                  ? "Rate not available"
-                  : num_pending.toFixed(2)}
-              </span></h3>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-4">
-            <h2>Number of transactions:</h2>
-          </div>
-          <div className="col-lg-2 align">
-            <h4>last 24 hours:</h4>
-            <h4>last month:</h4>
-          </div>
-          <div className="col-lg-2 align">
-            <h3><span id="num-trans-24">
-                {num_trans_24 == null
-                  ? "Rate not available"
-                  : num_trans_24.toFixed(2)}
-              </span></h3>
-            <h3><span id="num-trans-month">
-                {num_trans_month == null
-                  ? "Rate not available"
-                  : num_trans_month.toFixed(2)}
-              </span></h3>
-          </div>
-        </div>
-      </div>
       <div className="row">
         <div className="col-lg-12">
           <div className="jumbotron bg-cover">
@@ -294,7 +176,7 @@ function Statistics() {
         <input type="radio" value="168" name="gender" />1 Week     
       </div>
       <ResponsiveContainer width="120%" aspect={3}>
-      <LineChart data={graph} margin={{ right: 300 }}>
+      {/* <LineChart data={graph} margin={{ right: 300 }}>
 					<CartesianGrid />
 					<XAxis dataKey="date"
 						interval={'preserveStartEnd'} />
@@ -303,7 +185,8 @@ function Statistics() {
 					<Tooltip />
 					<Line dataKey="price_close"
 						stroke="blue" activeDot={{ r: 8 }} />
-				</LineChart>
+				</LineChart> */}
+        <Dashboard/>
 			</ResponsiveContainer>
       </div>
     </div>

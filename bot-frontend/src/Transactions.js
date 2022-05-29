@@ -87,8 +87,7 @@ function Transactions(){
       },
     })
       .then((response) => response.json())
-      .then((data) => {setBot(jsonToBot(data)); return bot;})
-      .then((bot) => {console.log(bot);setRisk(bot.risk); setBuyPercentage(bot.buy_percentage);setCoin_name(bot.coin_name);});
+      .then((data) => {setBot(jsonToBot(data)); setRisk(data.risk*100); setBuyPercentage(data.buy_percentage*100);setCoin_name(data.coin_name)});
   }, [userToken]);
   useEffect(() => {
     if (userToken) {

@@ -12,15 +12,6 @@ import {
   CartesianGrid
 } from 'recharts';
 import LoginDialog from "./UserCredentialsDialog/LoginDialog";
-import TradeViewChart  from "react-crypto-chart";
-import TradeView from "./TradeView";
-import { WS_URL } from './utils/constants';
-import {
-  candleStickDefaultConfig,
-  histogramDefaultConfig,
-  defaultChartLayout,
-} from './utils/constants';
-
 var SERVER_URL = "http://127.0.0.1:5000";
 
 const States = {
@@ -31,11 +22,6 @@ const States = {
 };
 
 function Statistics() {
-  let [buyUsdRate, setBuyUsdRate] = useState(null);
-  let [sellUsdRate, setSellUsdRate] = useState(null);
-  let [lbpInput, setLbpInput] = useState("");
-  let [usdInput, setUsdInput] = useState("");
-  let [transactionType, setTransactionType] = useState("usd-to-lbp");
   let [userToken, setUserToken] = useState(getUserToken());
   let [authState, setAuthState] = useState(States.PENDING);
 
@@ -69,14 +55,15 @@ function Statistics() {
   
   async function fetchGraph(val) {
     const data = parseInt(val);
-    await fetch(`${SERVER_URL}/graph`, {
+    await fetch(`${SERVER_URL}/getTrend`, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        start_range : data,
+        coin_name : 'Bitcoin',
+        hours: data
       }),
     })
       .then((response) => response.json())
@@ -301,16 +288,22 @@ function Statistics() {
       </div>
       <div className="top-container">
       <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
-        <input type="radio" value="1" name="gender" />1 Day  -
-        <input type="radio" value="3" name="gender" />3 Days  -    
-        <input type="radio" value="7" name="gender" />1 Week  -    
-        <input type="radio" value="30" name="gender" />1 Month     
+        <input type="radio" value="12" name="gender" />12 Hours  -
+        <input type="radio" value="24" name="gender" />1 Day  -    
+        <input type="radio" value="72" name="gender" />3 Day  -    
+        <input type="radio" value="168" name="gender" />1 Week     
       </div>
       <ResponsiveContainer width="120%" aspect={3}>
-      <TradeView
-        // initialChartData={candleStickData}
-      />
-        
+      <LineChart data={graph} margin={{ right: 300 }}>
+					<CartesianGrid />
+					<XAxis dataKey="date"
+						interval={'preserveStartEnd'} />
+					<YAxis></YAxis>
+					<Legend />
+					<Tooltip />
+					<Line dataKey="price_close"
+						stroke="blue" activeDot={{ r: 8 }} />
+				</LineChart>
 			</ResponsiveContainer>
       </div>
     </div>

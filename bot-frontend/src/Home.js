@@ -2,8 +2,11 @@ import './Home.css';
 import { useState, useEffect, useCallback } from "react";
 import { clearUserToken, saveUserToken, getUserToken } from "./localStorage";
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { jsonToWallet,walletToChart} from './models/wallet';
+import { jsonToPerformance } from './models/performance';
+import { PieChart } from 'react-minimal-pie-chart';
+import { jsonToExchangeRate } from './models/exchangeRate';
 import Transactions from './Transactions';
-import TradeViewChart from 'react-crypto-chart'
 
 import {
   LineChart,
@@ -27,27 +30,60 @@ const States = {
 };
 
 function Home(){
-  let [buyUsdRate, setBuyUsdRate] = useState(null);
-  let [sellUsdRate, setSellUsdRate] = useState(null);
+  let [wallet,setWallet] = useState(null);
+  let [exchangeRate,setExchangeRate] = useState(null)
+  let [performanceList,setPerformanceList] = useState([])
   let [userToken, setUserToken] = useState(getUserToken());
+  let [walletAmount,setWalletAmount] = useState(0)
+  let [firstWalletAmount,setFirstWalletAmount] = useState(0)
+  let [day3WalletAmount,setDay3WalletAmount] = useState(0)
+  let [day7WalletAmount,setDay7WalletAmount] = useState(0)
   let [authState, setAuthState] = useState(States.PENDING);
-  let [lbpCalcInp, setlbpCalcIn] = useState("");
-  let [usdCalcInp, setusdCalcInp] = useState("");
-  let [transTypeCalc, settransTypeCalc] = useState("usd-to-lbp");
   let [usdFunds, setUsdFunds] = useState("null");
   let [lbpFunds, setLbpFunds] = useState("null");
-  let [graph, setGraph] = useState(null);
+  let [graph, setGraph] = useState([]);
 
 
-  function fetchRates() {
-    fetch(`${SERVER_URL}/exchangeRate`)
+  function fetchWallet() {
+    fetch(`${SERVER_URL}/wallet`, {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": 'Bearer ' + getUserToken(),
+      },
+    })
       .then((response) => response.json())
-      .then((data) => {
-        setBuyUsdRate(data.lbp_to_usd);
-        setSellUsdRate(data.usd_to_lbp);
-      });
+      .then((walletData) => setWallet(jsonToWallet(walletData)));
   }
-  useEffect(fetchRates, []);
+  useEffect(fetchWallet, []);
+
+
+  function fetchRate() {
+    fetch(`${SERVER_URL}/exchangeRate`, {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setExchangeRate(jsonToExchangeRate(data)));
+  }
+  useEffect(fetchRate, []);
+
+
+
+  function getAmountFromDays(list,days){
+    let d = new Date()
+    d.setDate(d.getDate()-days);
+    console.log(d)
+    for(let i =0;i<list.length;i++){
+      if(Date.parse(list[i].date) > d)
+        return list[i].amount
+    }
+    return list.length != 0 ? list[list.length-1].amount : 0
+  }
 
   async function fetchGraph(val) {
     const data = parseInt(val);
@@ -61,7 +97,14 @@ function Home(){
       body: JSON.stringify({'days':data})
     })
       .then((response) => response.json())
-      .then((graph) => setGraph(graph));
+      .then((graph) => {
+        setPerformanceList(jsonToPerformance(graph)); 
+        setGraph(graph);
+        graph.length !=0 ? setWalletAmount(graph[graph.length-1].amount) : setWalletAmount(0);
+        graph.length !=0 ? setDay3WalletAmount(getAmountFromDays(graph,3)) : setDay3WalletAmount(0);
+        graph.length !=0 ? setDay7WalletAmount(getAmountFromDays(graph,7)) : setDay7WalletAmount(0);
+        graph.length !=0 ? setFirstWalletAmount(graph[0].amount) : setFirstWalletAmount(0);
+      });
   }
 
   async function addFunds() {
@@ -128,6 +171,22 @@ function Home(){
     setUserToken(null);
     clearUserToken();
   }
+
+
+  function calculateLastAmount(){
+    console.log(exchangeRate)
+    let previousAmount = (performanceList.length > 1) ? performanceList[performanceList.length-2].amount : 0;
+    let difference = walletAmount - previousAmount;
+    return difference
+  }
+
+  function calculatePercentage(oldAmount){
+    let difference = walletAmount - oldAmount;
+    let pctChange = difference/oldAmount * 100;
+    return pctChange
+  }
+
+
     return(
         <div className='transactions'>
             {authState === States.USER_CREATION && 
@@ -181,17 +240,42 @@ function Home(){
         <div className="row">
       <div className="col-lg-12">
         <div className="jumbotron bg-cover">
-          <h1>Today's Exchange Rate</h1>
+          <h1>Overview</h1>
         </div>
       </div>
     </div>
     <div className="row">
       <div className="col-lg-5">
         <div className="my-container left" >
-          <h1>BUY USD {" "}</h1>
-          <h3><span id="buy-usd-rate">
-            {buyUsdRate == null ? "Rate not available" : buyUsdRate.toFixed(2)}
-          </span></h3>
+          <h1>Account Value</h1>
+          <div className="row">
+            <div className='center-block'>
+              <h3>
+                {`$${walletAmount.toFixed(2)}`}
+              </h3>
+            </div>
+            <div className='center-block'>
+              <h3 style={{color: calculateLastAmount() >= 0 ? '#77DD77' : 'red'}}>
+                {'('+(calculateLastAmount() >= 0 ? '+' : "-") + `$${Math.abs(calculateLastAmount()).toFixed(2)})`}
+              </h3>
+          </div>
+          </div>
+          <div className='walletTable'>
+          <div className='row'>
+           
+          <div className='center-block'>3 Day</div>
+          <div className='center-block'>7 Day</div>
+          <div className='center-block'>All Time</div>
+          </div>
+          </div>
+          <div className='row'>
+          <div className='center-block' style={{color: calculatePercentage(day3WalletAmount) > 0 ? '#77DD77' : 'red'}}>
+            <h6>{(calculatePercentage(day3WalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(day3WalletAmount).toFixed(2)}%`}</h6></div>
+          <div className='center-block' style={{color: calculatePercentage(day7WalletAmount) > 0 ? '#77DD77' : 'red'}}>
+            <h6>{(calculatePercentage(day7WalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(day7WalletAmount).toFixed(2)}%`}</h6></div>
+          <div className='center-block' style={{color: calculatePercentage(firstWalletAmount) > 0 ? '#77DD77' : 'red'}}>
+            <h6>{(calculatePercentage(firstWalletAmount)>=0 ? '+' : '-')+`${calculatePercentage(firstWalletAmount).toFixed(2)}%`}</h6></div>
+          </div>
         </div>
       </div>
       <div className="col-lg-2 vertical-line">
@@ -199,92 +283,39 @@ function Home(){
       </div>
       <div className="col-lg-5">
         <div className="my-container right">
-          <h1>SELL USD {" "}</h1>
-          <h3><span id="sell-usd-rate">
-            {sellUsdRate == null
-              ? "Rate not available"
-              : sellUsdRate.toFixed(2)}
-          </span></h3>
+          <h1 style={{paddingBottom:'40px'}}> Wallet Composition </h1>
+          <PieChart
+            data={(wallet != null && exchangeRate != null) ? walletToChart(wallet,exchangeRate): []}
+            label={({ dataEntry }) =>  {console.log(dataEntry); return dataEntry.percentage > 40 ? dataEntry.title +" "+ dataEntry.percentage.toFixed() + "%": ''}}
+            labelPosition = {0}
+          />
         </div>
       </div>
     </div>
 
-    <div className="row">
-      <div className="calculator-container">
-        <h1>CALCULATOR</h1>
-        <div className="row">
-          <div className="col-lg-5">
-            <h3>LBP AMOUNT</h3>
-          </div>
-          <div className="col-lg-2 offset-lg-6">
-            <div>
-            <i className="bi-currency-exchange" ></i>
-            </div>
-          </div>
-          <div className="col-lg-5">
-            <h3>USD AMOUNT</h3>
-          </div>
-        </div>
-        <div className="row inputs">
-          <div className="col-lg-5">
-            <div className="input-group">
-              <input
-                className="form-control"
-                aria-label="Amount"
-                placeholder="LBP amount"
-                id="calc-lbp"
-              variant="filled"
-              type="number"
-              min="0"
-              value={lbpCalcInp}
-              onChange={(val) => {
-                if (transTypeCalc === "usd-to-lbp") {
-                  setlbpCalcIn(val.target.value);
-                  setusdCalcInp(val.target.value / sellUsdRate);
-                } else {
-                  setlbpCalcIn(val.target.value);
-                  setusdCalcInp(val.target.value / buyUsdRate);
-                }
-              }}
-              />
-            </div>
-          </div>
-          <div className="col-lg-2 offset-lg-6">
-            <div>
-            <div class="btn-group">
-            <button type="button" className="btn btn-primary" onClick={() => settransTypeCalc("usd-to-lbp")}>Sell USD</button>
-            <button type="button" className="btn btn-primary" onClick={() => settransTypeCalc("lbp-to-usd")}>Buy USD</button>
-          </div>
-            </div>
-          </div>
-          <div className="col-lg-5">
-            <div className="input-group">
-              <input
-                className="form-control"
-                aria-label="Amount"
-                placeholder="USD amount"
-                id="calc-usd"
-              variant="filled"
-              type="number"
-              min="0"
-              value={usdCalcInp}
-              onChange={(val) => {
-                if (transTypeCalc === "usd-to-lbp") {
-                  setusdCalcInp(val.target.value);
-                  setlbpCalcIn(val.target.value * sellUsdRate);
-                } else {
-                  setusdCalcInp(val.target.value);
-                  setlbpCalcIn(val.target.value * buyUsdRate);
-                }
-              }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div className="row">
+
+    <div className="top-container">
+      <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
+        <input type="radio" value="1" name="gender" />1 Day  -
+        <input type="radio" value="3" name="gender" />3 Days  -    
+        <input type="radio" value="7" name="gender" />1 Week  -    
+        <input type="radio" value="30" name="gender" />1 Month     
+      </div>
+      <ResponsiveContainer width="120%" aspect={3}>
+				<LineChart data={graph} margin={{ right: 300 }}>
+					<CartesianGrid />
+					<XAxis dataKey="date"
+						interval={'preserveStartEnd'} />
+					<YAxis></YAxis>
+					<Legend />
+					<Tooltip />
+					<Line dataKey="amount"
+						stroke="blue" activeDot={{ r: 8 }} />
+				</LineChart>
+			</ResponsiveContainer>
+      </div>
+      <div className="row">
       <div className="calculator-container">
         <h1>ADD FUNDS</h1>
         <div className="row inputs">
@@ -328,31 +359,15 @@ function Home(){
         <div className="row">
             <button type="button" className="button-funds" onClick={addFunds}>ADD FUNDS</button>
         </div>
-
-      </div>
-
-    </div>
-    <div className="top-container">
-      <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
-        <input type="radio" value="1" name="gender" />1 Day  -
-        <input type="radio" value="3" name="gender" />3 Days  -    
-        <input type="radio" value="7" name="gender" />1 Week  -    
-        <input type="radio" value="30" name="gender" />1 Month     
-      </div>
-      <ResponsiveContainer width="120%" aspect={3}>
-				<LineChart data={graph} margin={{ right: 300 }}>
-					<CartesianGrid />
-					<XAxis dataKey="date"
-						interval={'preserveStartEnd'} />
-					<YAxis></YAxis>
-					<Legend />
-					<Tooltip />
-					<Line dataKey="amount"
-						stroke="blue" activeDot={{ r: 8 }} />
-				</LineChart>
-			</ResponsiveContainer>
       </div>
     </div>
+
+
+    </div>
+
+  
+
+
     );
 }
     

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { clearUserToken, saveUserToken, getUserToken } from "./localStorage";
 import { NavLink, Route, Switch } from 'react-router-dom';
 import { DataGrid } from "@mui/x-data-grid";
+import {Bot,jsonToBot} from './models/bot'
 import LoginDialog from './UserCredentialsDialog/LoginDialog';
 
 var SERVER_URL = "http://127.0.0.1:5000";
@@ -19,10 +20,10 @@ function Transactions(){
   let [userToken, setUserToken] = useState(getUserToken());
   let [authState, setAuthState] = useState(States.PENDING);
   let [userTransactions, setUserTransactions] = useState([]);
-  let [risk, setRisk] = useState(null);
-  let [buy_percentage,setBuyPercentage] = useState(null);
+  let [risk, setRisk] = useState(0);
+  let [buy_percentage,setBuyPercentage] = useState(0);
   let [coin_name, setCoin_name] = useState("bitcoin");
-  let [bot_active,setBotActive] = useState(false);
+  let [bot,setBot] = useState(new Bot());
 
 
 
@@ -86,7 +87,8 @@ function Transactions(){
       },
     })
       .then((response) => response.json())
-      .then((data) => setBotActive(data['is_active']));
+      .then((data) => {setBot(jsonToBot(data)); return bot;})
+      .then((bot) => {console.log(bot);setRisk(bot.risk); setBuyPercentage(bot.buy_percentage);setCoin_name(bot.coin_name);});
   }, [userToken]);
   useEffect(() => {
     if (userToken) {
@@ -112,9 +114,9 @@ function Transactions(){
   }
   function Change_param(){
     const data = {
-      coin_name: coin_name.toLowerCase(),
-      risk: risk/100,
-      buy_percentage: buy_percentage/100
+      coin_name: bot.coin_name,
+      risk: bot.risk/100,
+      buy_percentage: bot.buy_percentage/100
     };
     return fetch(`${SERVER_URL}/change_param`, {
       method: "POST",
@@ -230,20 +232,20 @@ function Transactions(){
               variant="filled"
               type="number"
               min="0"
-              // value={lbpCalcInp}
+              value={risk}
               onChange={(val) => {
-                  setRisk(val.target.value);
+                setRisk(parseFloat(val.target.value))
+                bot.risk = parseFloat(val.target.value)
               }}
               />
             </div>
           </div>
           <div className="col-lg-8">
           <div className="input-group">
-              <select val="coin_name" value={coin_name} onChange={(val)=>{setCoin_name(val.target.value)}}>
-                <option value="Bitcoin">Bitcoin</option>
-                <option value="Ethereum">Ethereum</option>
-                <option value="mercedes">Coin 3</option>
-                <option value="audi">Coin 4</option>
+              <select val="coin_name" value={coin_name} onChange={(val)=>{setCoin_name(val.target.value);bot.coin_name=val.target.value}}>
+                <option value="bitcoin">Bitcoin</option>
+                <option value="ethereum">Ethereum</option>
+                <option value="bnb">BNB</option>
               </select>
             </div>
             </div>
@@ -257,9 +259,10 @@ function Transactions(){
               variant="filled"
               type="number"
               min="0"
-              // value={usdCalcInp}
+              value={buy_percentage}
               onChange={(val) => {
-                  setBuyPercentage(val.target.value);
+                setBuyPercentage(parseFloat(val.target.value))
+                bot.buy_percentage = parseFloat(val.target.value)
               }}
               />
             </div>
@@ -286,7 +289,7 @@ function Transactions(){
     <div className="row">
     <div className="col-lg-12">
                       
-    {bot_active === false ? (
+    { bot.is_active === false ? (
                       <div className="my-container center" >
                         <h1>Bot Deactivated {" "}</h1>
                         <div class="btn-group">

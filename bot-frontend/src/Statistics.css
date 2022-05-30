@@ -118,7 +118,8 @@ body {
 }
 
 .radio-buttons{
-    margin-left: 30%;
+    margin-left: 40%;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: large;
+    align-items: center;
 }

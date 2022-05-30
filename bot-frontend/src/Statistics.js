@@ -11,7 +11,6 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import Dashboard from './components/dashboard'
 import LoginDialog from "./UserCredentialsDialog/LoginDialog";
 var SERVER_URL = "http://127.0.0.1:5000";
 
@@ -30,17 +29,17 @@ function Statistics() {
 
 
   
-  async function fetchGraph(val) {
-    const data = parseInt(val);
-    await fetch(`${SERVER_URL}/getTrend`, {
+  async function fetchGraph(coin_name) {
+    
+    await fetch(`${SERVER_URL}/trend`, {
       method: "POST",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        coin_name : 'Bitcoin',
-        hours: data
+        coin_name : coin_name,
+        hours: 24
       }),
     })
       .then((response) => response.json())
@@ -170,13 +169,11 @@ function Statistics() {
       </div>
       <div className="top-container">
       <div className="radio-buttons" onChange={(val) => fetchGraph(val.target.value)}>
-        <input type="radio" value="12" name="gender" />12 Hours  -
-        <input type="radio" value="24" name="gender" />1 Day  -    
-        <input type="radio" value="72" name="gender" />3 Day  -    
-        <input type="radio" value="168" name="gender" />1 Week     
+        <input type="radio" value="bitcoin" name="gender" />Bitcoin   -
+        <input type="radio" value="ethereum" name="gender" />Ethereum        
       </div>
       <ResponsiveContainer width="120%" aspect={3}>
-      {/* <LineChart data={graph} margin={{ right: 300 }}>
+      <LineChart data={graph} margin={{ right: 300 }}>
 					<CartesianGrid />
 					<XAxis dataKey="date"
 						interval={'preserveStartEnd'} />
@@ -185,8 +182,7 @@ function Statistics() {
 					<Tooltip />
 					<Line dataKey="price_close"
 						stroke="blue" activeDot={{ r: 8 }} />
-				</LineChart> */}
-        <Dashboard/>
+				</LineChart>
 			</ResponsiveContainer>
       </div>
     </div>

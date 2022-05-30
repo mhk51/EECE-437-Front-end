@@ -342,52 +342,7 @@ function Home(){
 				</LineChart>
 			</ResponsiveContainer>
       </div>
-      <div className="row">
-      <div className="calculator-container">
-        <h1>ADD FUNDS</h1>
-        <div className="row inputs">
-          <div className="col-lg-5">
-            <div className="input-group">
-              <input
-                className="form-control"
-                aria-label="Amount"
-                placeholder="LBP amount"
-                id="funds-lbp"
-                variant="filled"
-                type="number"
-                min="0"
-                value={lbpFunds}
-                onChange={(val) => {
-                    setLbpFunds(val.target.value);                
-                }}
-              />
-            </div>
-          </div>
-          <div className="col-lg-2 offset-lg-6">
-          </div>
-          <div className="col-lg-5">
-            <div className="input-group">
-              <input
-                className="form-control"
-                aria-label="Amount"
-                placeholder="USD amount"
-                id="funds-usd"
-                variant="filled"
-                type="number"
-                min="0"
-                value={usdFunds}
-                onChange={(val) => {
-                    setUsdFunds(val.target.value);                
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="row">
-            <button type="button" className="button-funds" onClick={addFunds}>ADD FUNDS</button>
-        </div>
-      </div>
-    </div>
+      
 
 
     </div>
